@@ -14,21 +14,107 @@
     <h2 class="pb-2 border-bottom">Regex</h2>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
-        <div class="col d-flex align-items-start">
-            <img class="bi text-muted flex-shrink-0 me-3"
-                src="https://icons-for-free.com/iconfiles/png/512/bxl+django-1325051932950782714.png" width="50"
-                height="50">
-
-
-            <div>
-                <h4 class="fw-bold mb-0">Latest LTS Django</h4>
-                <p>Latest LTS included 3.2.x and needed requirements</p>
+       <div class="col d-flex align-items-start flex-column">
+            <h4 class="fw-bold mb-3">Enter National ID</h4>
+            <form onsubmit="return validateNationalId(event)"> 
+                <div class="mb-3">
+                    <label for="nationalId" class="form-label">National ID (10 Digits)</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="nationalId" 
+                           name="nationalId" 
+                           placeholder="e.g., 1234567890"
+                           required
+                           inputmode="numeric"
+                           pattern="^\d{10}$"
+                           title="National ID must be exactly 10 digits, with no spaces or hyphens."
+                           maxlength="10">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit ID</button>
+                <div id="validationFeedback" class="text-danger mt-2" style="display: none;"></div> 
+            </form>
             </div>
-        </div>
         
         
     </div>
 </div>
+<script>
+    /**
+     * Converts the C# NationalIDCheck function logic to JavaScript.
+     * Performs a strict 10-digit check, repetitive digit check, and checksum validation.
+     * @param {Event} event The submit event object.
+     * @returns {boolean} True if the ID is valid, false otherwise.
+     */
+    function validateNationalId(event) {
+        const idInput = document.getElementById('nationalId');
+        const nationalId = idInput.value;
+        const feedbackDiv = document.getElementById('validationFeedback');
+        
+        feedbackDiv.style.display = 'none'; // Hide previous messages
+        feedbackDiv.classList.remove('text-success', 'text-danger');
+        feedbackDiv.classList.add('text-danger'); // Default to error style
+        
+        // 1. Check for 10 digits (already mostly handled by HTML pattern="^\d{10}$")
+        if (nationalId.length !== 10) {
+            feedbackDiv.textContent = "National ID must be exactly 10 digits.";
+            feedbackDiv.style.display = 'block';
+            event.preventDefault(); 
+            return false;
+        }
+
+        // 2. Check for simple repetition (as in the C# code: "1111111111", etc.)
+        if (/^(\d)\1{9}$/.test(nationalId)) {
+            feedbackDiv.textContent = "Invalid ID: All digits cannot be the same.";
+            feedbackDiv.style.display = 'block';
+            event.preventDefault();
+            return false;
+        }
+
+        let sum = 0;
+        // 3. Calculate weighted sum for the first 9 digits (Weights 10 down to 2)
+        for (let i = 0; i < 9; i++) {
+            const weight = 10 - i;
+            // ParseInt extracts the digit from the string character
+            const digit = parseInt(nationalId[i], 10); 
+            sum += digit * weight;
+        }
+
+        // The 10th digit (index 9) is the Control Digit (a10 in C# code)
+        const controlDigit = parseInt(nationalId[9], 10); 
+
+        // 4. Calculate the remainder (mm in C# code)
+        let remainder = sum % 11;
+
+        // 5. Check based on remainder, matching the C# logic exactly
+        let isValid = false;
+        
+        if (remainder < 2) {
+             // C#: if (mm < 2) if (a10 == mm) return true;
+             if (controlDigit === remainder) {
+                 isValid = true;
+             }
+        } else {
+            // C#: if (mm >= 2) if ((11 - mm) == a10) return true;
+            if ((11 - remainder) === controlDigit) {
+                isValid = true;
+            }
+        }
+
+        // 6. Provide feedback and control submission
+        if (isValid) {
+            feedbackDiv.textContent = "National ID is valid.";
+            feedbackDiv.classList.remove('text-danger');
+            feedbackDiv.classList.add('text-success');
+            feedbackDiv.style.display = 'block';
+            return true; // Allow form submission
+        } else {
+            feedbackDiv.textContent = "National ID is invalid (checksum failed).";
+            feedbackDiv.style.display = 'block';
+            event.preventDefault(); // Stop form submission
+            return false;
+        }
+    }
+</script>
 {% endblock %}
 
 {% block extra_js %}
