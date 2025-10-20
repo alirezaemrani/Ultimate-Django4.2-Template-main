@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+    .logo {
+        -webkit-filter: grayscale(100%);
+        /* Safari 6.0 - 9.0 */
+        filter: grayscale(100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-5" id="Features">
+    <h2 class="pb-2 border-bottom">Regex</h2>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
+        <div class="col d-flex align-items-start">
+            <img class="bi text-muted flex-shrink-0 me-3"
+                src="https://icons-for-free.com/iconfiles/png/512/bxl+django-1325051932950782714.png" width="50"
+                height="50">
+
+
+            <div>
+                <h4 class="fw-bold mb-0">Latest LTS Django</h4>
+                <p>Latest LTS included 3.2.x and needed requirements</p>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
